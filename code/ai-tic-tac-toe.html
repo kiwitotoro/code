@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Tic Tac Toe</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f0f0f0;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    #controls {
+      margin-bottom: 20px;
+    }
+
+    #board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+    }
+
+    .cell {
+      background: white;
+      border: 2px solid #333;
+      font-size: 2.5em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    #message {
+      margin-top: 15px;
+      font-size: 1.2em;
+    }
+
+    select, button {
+      padding: 8px;
+      font-size: 1em;
+      margin: 0 5px;
+    }
+
+    .disabled {
+      pointer-events: none;
+      background-color: #ddd;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Tic Tac Toe</h1>
+
+  <div id="controls">
+    <label>
+      Mode:
+      <select id="mode">
+        <option value="human">Human vs Human</option>
+        <option value="easy">AI (Easy)</option>
+        <option value="medium">AI (Medium)</option>
+        <option value="hard">AI (Hard)</option>
+      </select>
+    </label>
+    <button id="restart">Restart Game</button>
+  </div>
+
+  <div id="board"></div>
+
+  <div id="message"></div>
+
+  <script>
+    const boardEl = document.getElementById('board');
+    const messageEl = document.getElementById('message');
+    const restartBtn = document.getElementById('restart');
+    const modeSelect = document.getElementById('mode');
+
+    let board = Array(9).fill(null);
+    let currentPlayer = 'X';
+    let gameOver = false;
+
+    const winPatterns = [
+      [0,1,2], [3,4,5], [6,7,8],  // rows
+      [0,3,6], [1,4,7], [2,5,8],  // cols
+      [0,4,8], [2,4,6]            // diagonals
+    ];
+
+    function renderBoard() {
+      boardEl.innerHTML = '';
+      board.forEach((value, i) => {
+        const cell = document.createElement('div');
+        cell.className = 'cell';
+        cell.textContent = value || '';
+        cell.addEventListener('click', () => handleMove(i));
+        boardEl.appendChild(cell);
+      });
+    }
+
+    function handleMove(index) {
+      if (gameOver || board[index]) return;
+
+      board[index] = currentPlayer;
+      renderBoard();
+
+      if (checkWin(currentPlayer)) {
+        messageEl.textContent = `${currentPlayer} wins!`;
+        gameOver = true;
+        return;
+      } else if (board.every(Boolean)) {
+        messageEl.textContent = "It's a draw!";
+        gameOver = true;
+        return;
+      }
+
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+
+      const mode = modeSelect.value;
+      if (!gameOver && mode !== 'human' && currentPlayer === 'O') {
+        setTimeout(aiMove, 300);
+      } else {
+        messageEl.textContent = `Turn: ${currentPlayer}`;
+      }
+    }
+
+    function checkWin(player) {
+      return winPatterns.some(pattern =>
+        pattern.every(i => board[i] === player)
+      );
+    }
+
+    function emptyIndices() {
+      return board.map((val, idx) => val === null ? idx : null).filter(i => i !== null);
+    }
+
+    function aiMove() {
+      const mode = modeSelect.value;
+      let move;
+
+      if (mode === 'easy') {
+        const choices = emptyIndices();
+        move = choices[Math.floor(Math.random() * choices.length)];
+      } else if (mode === 'medium') {
+        move = getMediumMove();
+      } else if (mode === 'hard') {
+        move = minimax(board, 'O').index;
+      }
+
+      if (move !== undefined) {
+        handleMove(move);
+      }
+    }
+
+    function getMediumMove() {
+      const opponent = 'X';
+
+      // Win if possible
+      for (let i of emptyIndices()) {
+        const newBoard = [...board];
+        newBoard[i] = 'O';
+        if (checkWinOnBoard(newBoard, 'O')) return i;
+      }
+
+      // Block opponent win
+      for (let i of emptyIndices()) {
+        const newBoard = [...board];
+        newBoard[i] = opponent;
+        if (checkWinOnBoard(newBoard, opponent)) return i;
+      }
+
+      // Else random
+      const choices = emptyIndices();
+      return choices[Math.floor(Math.random() * choices.length)];
+    }
+
+    function checkWinOnBoard(b, player) {
+      return winPatterns.some(pattern =>
+        pattern.every(i => b[i] === player)
+      );
+    }
+
+    function minimax(newBoard, player) {
+      const availSpots = emptyIndices(newBoard);
+
+      if (checkWinOnBoard(newBoard, 'X')) return { score: -10 };
+      if (checkWinOnBoard(newBoard, 'O')) return { score: 10 };
+      if (availSpots.length === 0) return { score: 0 };
+
+      const moves = [];
+
+      for (let i of availSpots) {
+        const move = {};
+        move.index = i;
+        newBoard[i] = player;
+
+        const result = minimax(newBoard, player === 'O' ? 'X' : 'O');
+        move.score = result.score;
+
+        newBoard[i] = null;
+        moves.push(move);
+      }
+
+      let bestMove;
+      if (player === 'O') {
+        let bestScore = -Infinity;
+        for (let i = 0; i < moves.length; i++) {
+          if (moves[i].score > bestScore) {
+            bestScore = moves[i].score;
+            bestMove = moves[i];
+          }
+        }
+      } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < moves.length; i++) {
+          if (moves[i].score < bestScore) {
+            bestScore = moves[i].score;
+            bestMove = moves[i];
+          }
+        }
+      }
+
+      return bestMove;
+    }
+
+    restartBtn.addEventListener('click', resetGame);
+
+    function resetGame() {
+      board = Array(9).fill(null);
+      currentPlayer = 'X';
+      gameOver = false;
+      renderBoard();
+      messageEl.textContent = `Turn: ${currentPlayer}`;
+    }
+
+    // Initial render
+    renderBoard();
+    messageEl.textContent = `Turn: ${currentPlayer}`;
+  </script>
+</body>
+</html>
