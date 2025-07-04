@@ -5,19 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Human made tic tac toe game</title>
-    <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="human/style.css">
     <link rel="icon" href="./favicon.ico" type="image/x-icon">
   </head>
   <body>
     <main>
-        <h1>Human made tic tac toe game will go here.</h1>  
+        <h1>Human made tic tac toe game</h1> 
+      <div class="container">
+  <div class="board clearfix">
+    <div class="row">
+      <div class="square" id="0"></div>
+      <div class="square" id="1"></div>
+      <div class="square" id="2"></div>
+    </div>
+    <div class="row">
+      <div class="square" id="3"></div>
+      <div class="square" id="4"></div>
+      <div class="square" id="5"></div>
+    </div>
+    <div class="row">
+      <div class="square" id="6"></div>
+      <div class="square" id="7"></div>
+      <div class="square" id="8"></div>
+    </div>
+    <div class="modal-container">
+      <div class="modal choose-modal">
+        <h3>Choose Your Weapon</h3>
+        <div class="button-area"><span class="x-marker">X</span><span class="o-marker">O</span>
+        </div>
+      </div>
+      <div class="modal end-game-modal">
+        <h3></h3>
+        <p>Try harder next time!</p>
+        <div class="button-area"><span>Play Again</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
       <dl>
-        <dt>This page was created by me following tutorials and My own ideas.</dt>
-        <dd>It was made after creating and testing the AI version on this site.</dd>
+        <dt>This page was created by me following tutorials and my own ideas.</dt>
+        <dd>It was made after creating and testing the AI version on this site. <a href="https://codepel.com/html5-games/tic-tac-toe-game-player-vs-computer-in-javascript/">This tutorial</a> was the basis.</dd>
         <dt>Return to the main menu:</dt>
         <dd><a href="/code/index.html">Main menu</a></dd>
       </dl>
     </main>
-    <script src="index.js"></script>
+    <script src="human/index.js"></script>
   </body>
 </html>
